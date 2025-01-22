@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+    <section class="py-5">
+        <div class="container px-5 mb-5">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bolder mb-0"><span class="text-gradient d-inline">Add Projects</span></h1>
+            </div>
+        </div>
+    </section>
+{% from 'bootstrap5/form.html' import render_form %}
+<div class="container">
+    <div class="row">
+        {{ ckeditor.config(name='body')|safe }}
+        <div class="col-lg-8 col-md-10 mx-auto">
+            {{ render_form(form)|safe }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
