@@ -4,6 +4,9 @@
 .idea/
 .vscode
 
+# database files
+portfolio.db
+
 # other files
 .DS_Store
 .AppleDouble
