@@ -31,12 +31,6 @@
                                                     <img src="{{ url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image">
                                                 </div>
                                             {% endfor %}
-                                        {% else %}
-                                            <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
-                                                <div class="card-body p-5">
-                                                    <p>No projects available yet.</p> <!--- Or something more descriptive -->
-                                                </div>
-                                            </div>
                                         {% endif %}
                                     </div>
                                 </div>
