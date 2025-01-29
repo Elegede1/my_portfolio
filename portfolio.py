@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 import datetime
 from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
 from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
@@ -13,6 +11,8 @@ from forms import LoginForm, RegisterForm, PostForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
+
 import os
 
 load_dotenv()
@@ -25,6 +25,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CSRFProtect(app)
 Bootstrap5(app)
+
 
 class Base(DeclarativeBase):
     pass
@@ -51,6 +52,20 @@ class Project(db.Model):
 
 with app.app_context():
     db.create_all() # create all tables in the database
+    # Create default admin user if none exists
+    if not User.query.first():
+        admin_user = User(
+            email=os.getenv('ADMIN_EMAIL', 'admin@example.com'),
+            password=generate_password_hash(os.getenv('ADMIN_PASSWORD', os.getenv('admin_password')), method='pbkdf2:sha256', salt_length=8),
+            name='Admin',
+            id=1
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+
+# Define upload folder
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -59,9 +74,13 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # # Skip authentication check for index route
+        # if request.endpoint == 'index':
+        #     return f(*args, **kwargs)
         if current_user.id != 1 and not current_user.is_authenticated:
             return abort(403)
-        return f(*args, **kwargs)
+        else:
+            return f(*args, **kwargs)
     return decorated_function
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -109,16 +128,19 @@ def index():
     return render_template('index.html', year=current_year)
 
 
-
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
 
-@app.route('/projects')
+@app.route('/projects', methods=['GET'])
 def projects():
     projects = Project.query.all()
+    # projects = db.get_or_404(Project)
     current_year = datetime.datetime.now().year
-    return render_template('projects.html', projects=projects, year=current_year)
+    return render_template('projects.html', projects=projects, year=current_year, user=current_user)
+
+
+
 
 @app.route('/add_project', methods=['GET', 'POST'])
 @login_required
@@ -126,10 +148,16 @@ def projects():
 def add_project():
     form = PostForm()
     if form.validate_on_submit():
+        if form.img_url.data:
+            file = form.img_url.data
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            img_url = f'uploads/{filename}' # save file to static/uploads folder
         new_project = Project(
             title=form.title.data,
             body=form.body.data,
-            img_url=form.img_url.data,
+            img_url=img_url,
             user_id=current_user.id
         )
         db.session.add(new_project)
@@ -169,4 +197,4 @@ def download():
     return send_from_directory('static', path="files/Jekuthiel_Okafor's_resume.pdf")
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

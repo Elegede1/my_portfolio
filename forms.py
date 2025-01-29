@@ -29,6 +29,6 @@ class RegisterForm(FlaskForm):
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    content = CKEditorField('Content', validators=[DataRequired()])
-    image = FileField('Image', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')])
+    body = CKEditorField('Content', validators=[DataRequired()])
+    img_url = FileField('Image', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')])
     submit = SubmitField('Post')
