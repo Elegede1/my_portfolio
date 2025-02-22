@@ -55,8 +55,8 @@ with app.app_context():
     # Create default admin user if none exists
     if not User.query.first():
         admin_user = User(
-            email=os.getenv('ADMIN_EMAIL', 'admin@example.com'),
-            password=generate_password_hash(os.getenv('ADMIN_PASSWORD', os.getenv('admin_password')), method='pbkdf2:sha256', salt_length=8),
+            email=os.getenv('admin_email'),
+            password=generate_password_hash(os.getenv('admin_password'), method='pbkdf2:sha256', salt_length=8),
             name='Admin',
             id=1
         )
