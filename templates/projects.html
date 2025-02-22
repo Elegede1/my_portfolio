@@ -19,8 +19,8 @@
                                             <div class="project-container">
                                                 <div class="project-card">
                                                     <div class="project-text">
-                                                        <h2>{{ project.title }}</h2>
-                                                            {{ project.body | safe }}
+                                                        <h2>{{ project.title or '' }}</h2>
+                                                            {{ project.body|default('') | safe }}
                                                         <a href="https://github.com/Elegede1/pong_game" class="btn btn-outline-primary mt-3"><i class="fab fa-github"></i> github</a>
                                                         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
                                                         {% if user.is_authenticated %}
