@@ -10,38 +10,38 @@
             <div class="row gx-5 justify-content-center">
                 <div class="col-lg-11 col-xl-9 col-xxl-8">
                     <!-- Project Card 1-->
-                     {% if projects %}
-                    {% for project in projects %}
-                        <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
-                            <div class="card-body p-0">
-                                <div class="d-flex align-items-center">
-                                    <div class="p-5">
-                                        <div class="project-card"> <!--- Main card structure starts here -->
-                                            <div class="project-text">
-                                                <h2>{{ project.title }}</h2>
-                                                {{ project.body | safe }}
-                                                <a href="https://github.com/Elegede1/pong_game" class="btn btn-outline-primary mt-3"><i class="fab fa-github"></i> github</a>
-                                                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-                                                {% if user.is_authenticated %}
-                                                    <a href="{{ url_for('edit_project', project_id=project.id) }}" class="btn btn-outline-primary mt-3">Edit</a>
-                                                    <a href="{{ url_for('delete_project', project_id=project.id) }}" class="btn btn-outline-primary mt-3">Delete</a>
-                                                {% endif %}
+                    {% if projects %}
+                        {% for project in projects %}
+                            <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
+                                <div class="card-body p-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-5">
+                                            <div class="project-container">
+                                                <div class="project-card">
+                                                    <div class="project-text">
+                                                        <h2>{{ project.title }}</h2>
+                                                            {{ project.body | safe }}
+                                                        <a href="https://github.com/Elegede1/pong_game" class="btn btn-outline-primary mt-3"><i class="fab fa-github"></i> github</a>
+                                                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                                                        {% if user.is_authenticated %}
+                                                            <a href="{{ url_for('edit_project', project_id=project.id) }}" class="btn btn-outline-primary mt-3">Edit</a>
+                                                            <a href="{{ url_for('delete_project', project_id=project.id) }}" class="btn btn-outline-primary mt-3">Delete</a>
+                                                        {% endif %}
+                                                    </div>
+                                                    <img src="{{ url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image">
+                                                </div>
                                             </div>
-                                            {% if project.img_url %}
-                                                <img src="{{ url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image">
-                                            {% endif %}
-                                        </div>  <!---  Close project-card div  -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
                     {% else %}
-                        <div class="card overflow-hidden shadow rounded-4 border-0 mb-5"> <!--- Create the card structure here -->
-                            <div class="card-body p-5"> <!---  Consistent with the 'then' block's padding -->
-                                <p>No projects available yet.</p>
+                        <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
+                            <div class="card-body p-5">
+                                <p>No projects available yet.</p> <!--- Or something more descriptive -->
                             </div>
-                        </div> <!--- Close outer card div in the else block -->
+                        </div>
                     {% endif %}
                 </div>
             </div>

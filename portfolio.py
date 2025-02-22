@@ -148,18 +148,16 @@ def projects():
 def add_project():
     form = PostForm()
     if form.validate_on_submit():
-        img_url = None  # Default to None if no image uploaded
         if form.img_url.data:
             file = form.img_url.data
             filename = secure_filename(file.filename)
-            if filename:
-              file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-              file.save(file_path)
-              img_url = f'uploads/{filename}' # save file to static/uploads folder
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            img_url = f'uploads/{filename}' # save file to static/uploads folder
         new_project = Project(
             title=form.title.data,
             body=form.body.data,
-            img_url=img_url,  # Now can be None
+            img_url=img_url,
             user_id=current_user.id
         )
         db.session.add(new_project)
