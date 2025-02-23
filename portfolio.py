@@ -53,10 +53,11 @@ class Project(db.Model):
 with app.app_context():
     db.create_all() # create all tables in the database
     # Create default admin user if none exists
+    password = os.getenv('admin_password')
     if not User.query.first():
         admin_user = User(
             email=os.getenv('admin_email'),
-            password=generate_password_hash(os.getenv('admin_password'), method='pbkdf2:sha256', salt_length=8),
+            password=generate_password_hash(password, method='pbkdf2:sha256', salt_length=8),
             name='Admin',
             id=1
         )
