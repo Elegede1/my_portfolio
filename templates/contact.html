@@ -26,7 +26,7 @@
                     {% endwith %}
 
                     <!-- Use Flask-WTF to render the form -->
-                    {% from 'bootstrap5/form.html' import render_form %}
+                    {% from 'bootstrap/form.html' import render_form %}
                     {{ render_form(form, novalidate=True, button_map={'submit': 'primary btn-lg'})|safe }}
 
                 </div>

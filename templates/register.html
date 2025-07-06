@@ -6,7 +6,7 @@
             <div class="col-md-8">
                 <div class="card mx-auto">
                     <div class="card-body">
-                        {% from 'bootstrap5/form.html' import render_form %}
+                        {% from 'bootstrap/form.html' import render_form %}
                         {{ render_form(form, novalidate=True, button_map={'submit': 'primary'})|safe }}
                     </div>
                 </div>

@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 import datetime
 from flask_bootstrap import Bootstrap
 from flask_wtf import CSRFProtect
-from flask_ckeditor import CKEditor
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import LoginForm, RegisterForm, PostForm, ContactForm
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,8 +18,6 @@ from pymongo.errors import ConnectionFailure
 load_dotenv()
 
 app = Flask(__name__)
-ckeditor = CKEditor(app)
-app.config['CKEDITOR_CONFIG'] = {'toolbar': 'Full', 'height': 500}
 app.config['SECRET_KEY'] = os.getenv('secret_key')
 login_manager = LoginManager()
 login_manager.init_app(app)

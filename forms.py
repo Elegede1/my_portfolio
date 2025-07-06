@@ -1,8 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, URL, Optional
-from flask_ckeditor import CKEditorField
 
 
 class LoginForm(FlaskForm):
@@ -10,7 +9,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
-
 
 
 class RegisterForm(FlaskForm):
@@ -30,7 +28,7 @@ class RegisterForm(FlaskForm):
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    body = CKEditorField('Content', validators=[DataRequired()])
+    body = TextAreaField('Content', validators=[DataRequired()])
 
     # WORLD-CLASS CHANGE: Set a generic label in the form definition
     img_url = FileField('Project Image', validators=[
@@ -46,5 +44,5 @@ class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     subject = StringField('Subject', validators=[DataRequired()])
-    message = CKEditorField('Message', validators=[DataRequired()])
+    message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Send')
