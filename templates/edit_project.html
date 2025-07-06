@@ -10,10 +10,21 @@
     </section>
 {% from 'bootstrap5/form.html' import render_form %}
 <div class="container">
-    <div class="row">
-        {{ ckeditor.config(name='body')|safe }}
-        <div class="col-lg-8 col-md-10 mx-auto">
-            {{ render_form(form)|safe }}
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <!-- World-Class Enhancement: Display the current project image -->
+            {% if current_img_url %}
+                <div class="mb-4 text-center">
+                    <p class="text-muted">Current Image:</p>
+                    <img src="{{ url_for('static', filename=current_img_url) }}" class="img-fluid rounded shadow-sm" style="max-height: 250px;" alt="Current project image">
+                </div>
+            {% endif %}
+
+            {{ ckeditor.config(name='body')|safe }}
+
+            <!-- Pass novalidate and button_map for consistency -->
+            {{ render_form(form, novalidate=True, button_map={'submit': 'primary'})|safe }}
         </div>
     </div>
 </div>
