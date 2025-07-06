@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort
 import datetime
-from flask_bootstrap import Bootstrap5
+from flask_bootstrap import Bootstrap
 from flask_wtf import CSRFProtect
 from flask_ckeditor import CKEditor
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
@@ -25,7 +25,7 @@ app.config['SECRET_KEY'] = os.getenv('secret_key')
 login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CSRFProtect(app)
-Bootstrap5(app)
+Bootstrap(app)
 
 # --- MongoDB Configuration ---
 mongo_uri = os.getenv('MONGO_URI')
