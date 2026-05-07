@@ -21,7 +21,7 @@ load_dotenv()
 
 # Updated paths for Vercel structure
 # We use root_path to ensure relative paths work in both local and Vercel environments
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app = Flask(__name__)
 # --- Robust Environment Variable Retrieval ---
 # Try both lowercase and uppercase as users often mix them in Vercel settings
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.getenv('secret_key')
@@ -41,7 +41,7 @@ csrf = CSRFProtect(app)
 Bootstrap(app)
 
 # --- Define upload folder ---
-UPLOAD_FOLDER = os.path.join(app.root_path, '../static/uploads')
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static/uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -174,7 +174,7 @@ def resume():
 
 @app.route('/download')
 def download():
-    return send_from_directory('../static', path="files/Jekuthiel_Okafor's_resume.pdf")
+    return send_from_directory('static', path="files/Jekuthiel_Okafor's_resume.pdf")
 
 if __name__ == '__main__':
     app.run(debug=True)
