@@ -27,6 +27,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.getenv('secret_key')
 
 mongo_uri = os.getenv('MONGO_URI') or os.getenv('mongo_uri')
+if mongo_uri:
+    # Safety: Remove trailing slashes that cause "Bad database name" errors
+    mongo_uri = mongo_uri.strip().replace('/?', '?')
+    if mongo_uri.endswith('/'):
+        mongo_uri = mongo_uri[:-1]
+
 if not mongo_uri:
     # On Vercel, we want to know exactly why it's failing
     print("CRITICAL: MONGO_URI is not set in environment variables.")
