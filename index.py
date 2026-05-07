@@ -41,9 +41,13 @@ csrf = CSRFProtect(app)
 Bootstrap(app)
 
 # --- Define upload folder ---
-UPLOAD_FOLDER = os.path.join(app.root_path, 'static/uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+try:
+    UPLOAD_FOLDER = os.path.join(app.root_path, 'static/uploads')
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+except Exception as e:
+    print(f"Warning: Could not create upload folder: {e}")
 
 # --- Admin Security and Views ---
 class SecureModelView(ModelView):
