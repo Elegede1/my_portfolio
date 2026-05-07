@@ -3,7 +3,7 @@ import datetime
 from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm
+from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
@@ -76,9 +76,11 @@ class ProjectView(SecureModelView):
 
 class UserView(SecureModelView):
     column_list = ('name', 'email', 'role')
+    form = UserForm
 
 class MessageView(SecureModelView):
     column_list = ('name', 'email', 'subject', 'date_submitted')
+    form = MessageForm
     can_create = False # Messages come from contact form
     column_default_sort = ('date_submitted', True)
 
