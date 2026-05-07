@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort
 import datetime
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, PostForm, ContactForm
+from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
@@ -44,7 +44,7 @@ mongo = PyMongo(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CSRFProtect(app)
-Bootstrap(app)
+Bootstrap4(app)
 
 # --- Define upload folder ---
 try:
@@ -64,7 +64,8 @@ class SecureModelView(ModelView):
         return redirect(url_for('login', next=request.url))
 
 class ProjectView(SecureModelView):
-    column_list = ('title', 'date', 'github_url')
+    column_list = ('title', 'description', 'image', 'github_url', 'live_url')
+    form = ProjectForm
     # Flask-Admin PyMongo requires explicit form mapping if not using MongoEngine
     # However, since we want security and simplicity, we use the basic ModelView
     
