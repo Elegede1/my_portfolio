@@ -136,6 +136,10 @@ def login():
             return redirect(url_for('login'))
     return render_template('login.html', form=form)
 
+@app.route('/test')
+def test_route():
+    return "App is running! If you see this, the serverless function is working, but the database connection might be the issue."
+
 @app.route('/logout')
 @login_required
 def logout():
