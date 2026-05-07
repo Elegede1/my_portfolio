@@ -22,20 +22,23 @@ load_dotenv()
 # Updated paths for Vercel structure
 # We use root_path to ensure relative paths work in both local and Vercel environments
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.config['SECRET_KEY'] = os.getenv('secret_key')
+# --- Robust Environment Variable Retrieval ---
+# Try both lowercase and uppercase as users often mix them in Vercel settings
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') or os.getenv('secret_key')
+
+mongo_uri = os.getenv('MONGO_URI') or os.getenv('mongo_uri')
+if not mongo_uri:
+    # On Vercel, we want to know exactly why it's failing
+    print("CRITICAL: MONGO_URI is not set in environment variables.")
+    raise ValueError("MONGO_URI environment variable is missing. Please add it to your Vercel Project Settings.")
+
+app.config['MONGO_URI'] = mongo_uri
+mongo = PyMongo(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 csrf = CSRFProtect(app)
 Bootstrap(app)
-
-# --- MongoDB Configuration ---
-mongo_uri = os.getenv('MONGO_URI')
-if not mongo_uri:
-    raise ValueError("FATAL ERROR: MONGO_URI environment variable is not set.")
-
-app.config['MONGO_URI'] = mongo_uri
-mongo = PyMongo(app)
 
 # --- Define upload folder ---
 UPLOAD_FOLDER = os.path.join(app.root_path, '../static/uploads')
