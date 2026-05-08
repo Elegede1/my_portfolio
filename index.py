@@ -84,8 +84,8 @@ class MessageView(SecureModelView):
     can_create = False # Messages come from contact form
     column_default_sort = ('date_submitted', True)
 
-# Initialize Flask-Admin
-admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/admin')
+# Initialize Flask-Admin with secret URL
+admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/12812673-738234admin')
 admin.add_view(ProjectView(mongo.db.projects, 'Projects'))
 admin.add_view(UserView(mongo.db.users, 'Users'))
 admin.add_view(MessageView(mongo.db.messages, 'Contact Messages'))
@@ -132,7 +132,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/12812673-738234login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -142,7 +142,7 @@ def login():
             user = User(user_data)
             login_user(user)
             if user.role == 'admin':
-                return redirect('/admin')
+                return redirect('/12812673-738234admin')
             return redirect(url_for('projects'))
         else:
             flash('Invalid email or password.')
