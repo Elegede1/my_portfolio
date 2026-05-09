@@ -1,0 +1,53 @@
+{% extends 'admin/base.html' %}
+
+{% block head_tail %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    <style>
+        /* Admin specific dark mode toggle button styling */
+        #adminDarkModeToggle {
+            margin-top: 10px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block access_control %}
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a id="adminDarkModeToggle" title="Toggle Dark Mode">
+                <i class="fa fa-moon-o"></i>
+            </a>
+        </li>
+        {{ super() }}
+    </ul>
+{% endblock %}
+
+{% block tail %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('adminDarkModeToggle');
+            const body = document.body;
+            
+            // Check saved preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                body.classList.add('dark-mode');
+                toggle.innerHTML = '<i class="fa fa-sun-o"></i>';
+            }
+
+            toggle.addEventListener('click', function() {
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    toggle.innerHTML = '<i class="fa fa-sun-o"></i>';
+                } else {
+                    localStorage.setItem('darkMode', 'disabled'); // Keep consistent with disabled state
+                    toggle.innerHTML = '<i class="fa fa-moon-o"></i>';
+                }
+            });
+        });
+    </script>
+{% endblock %}

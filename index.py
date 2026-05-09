@@ -3,7 +3,7 @@ import datetime
 from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm
+from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
@@ -16,6 +16,7 @@ from bson.objectid import ObjectId
 from pymongo.errors import ConnectionFailure
 from flask_admin import Admin
 from flask_admin.contrib.pymongo import ModelView
+from flask_admin.contrib.fileadmin import FileAdmin
 
 load_dotenv()
 
@@ -63,6 +64,13 @@ class SecureModelView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login', next=request.url))
 
+class SecureFileAdmin(FileAdmin):
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'admin'
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
 class ProjectView(SecureModelView):
     column_list = ('title', 'description', 'image', 'github_url', 'live_url')
     form = ProjectForm
@@ -84,11 +92,31 @@ class MessageView(SecureModelView):
     can_create = False # Messages come from contact form
     column_default_sort = ('date_submitted', True)
 
-# Initialize Flask-Admin with secret URL
-admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/12812673-738234admin')
+class ExperienceView(SecureModelView):
+    column_list = ('company', 'title', 'date_range')
+    form = ExperienceForm
+
+class EducationView(SecureModelView):
+    column_list = ('institution', 'degree', 'date_range')
+    form = EducationForm
+
+class SkillView(SecureModelView):
+    column_list = ('name', 'skill_type')
+    form = SkillForm
+
+
+# Initialize Flask-Admin with secret URL and custom base template for Dark Mode
+admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/12812673-738234admin', base_template='admin/master.html')
 admin.add_view(ProjectView(mongo.db.projects, 'Projects'))
 admin.add_view(UserView(mongo.db.users, 'Users'))
 admin.add_view(MessageView(mongo.db.messages, 'Contact Messages'))
+admin.add_view(ExperienceView(mongo.db.experience, 'Resume - Experience'))
+admin.add_view(EducationView(mongo.db.education, 'Resume - Education'))
+admin.add_view(SkillView(mongo.db.skills, 'Resume - Skills'))
+
+# Allow editing the resume PDF
+path = os.path.join(app.root_path, 'static', 'files')
+admin.add_view(SecureFileAdmin(path, '/static/files/', name='Resume File'))
 
 # --- User Model Wrapper for Flask-Login ---
 class User(UserMixin):
@@ -187,7 +215,18 @@ def projects():
 
 @app.route('/resume')
 def resume():
-    return render_template('resume.html')
+    experience = list(mongo.db.experience.find())
+    education = list(mongo.db.education.find())
+    # Separate skills by type
+    prof_skills = list(mongo.db.skills.find({"skill_type": "Professional"}))
+    lang_skills = list(mongo.db.skills.find({"skill_type": "Language"}))
+    
+    return render_template('resume.html', 
+                           experience=experience, 
+                           education=education, 
+                           prof_skills=prof_skills, 
+                           lang_skills=lang_skills)
+
 
 @app.route('/download')
 def download():

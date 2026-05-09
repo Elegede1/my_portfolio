@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, URL, Optional
 
@@ -67,3 +67,25 @@ class ContactForm(FlaskForm):
     subject = StringField('Subject', validators=[DataRequired()])
     message = TextAreaField('Message', validators=[DataRequired()])
     submit = SubmitField('Send')
+
+
+class ExperienceForm(FlaskForm):
+    company = StringField('Company', validators=[DataRequired()])
+    title = StringField('Job Title', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    date_range = StringField('Date Range (e.g. 2019 - Present)', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+
+
+class EducationForm(FlaskForm):
+    institution = StringField('Institution', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    degree = StringField('Degree', validators=[DataRequired()])
+    field = StringField('Field of Study', validators=[DataRequired()])
+    date_range = StringField('Date Range (e.g. 2013 - 2017)', validators=[DataRequired()])
+
+
+class SkillForm(FlaskForm):
+    name = StringField('Skill Name', validators=[DataRequired()])
+    skill_type = SelectField('Type', choices=[('Professional', 'Professional'), ('Language', 'Language')], validators=[DataRequired()])
+
