@@ -12044,3 +12044,37 @@ html {
     border-color: #444;
 }
 
+
+/* Admin Toggle Button Colors */
+body.dark-mode #adminDarkModeToggle {
+    color: #ffffff !important;
+}
+body:not(.dark-mode) #adminDarkModeToggle {
+    color: #343a40 !important;
+}
+
+/* Selection Highlight */
+body.dark-mode ::selection {
+    background-color: #555555 !important;
+    color: #ffffff !important;
+}
+body:not(.dark-mode) ::selection {
+    background-color: #cccccc !important;
+    color: #000000 !important;
+}
+
+/* Hover States for links and rows */
+body.dark-mode a:hover,
+body.dark-mode .table-hover tbody tr:hover td,
+body.dark-mode .table-hover tbody tr:hover th {
+    color: #ffffff !important;
+    background-color: #3a3a3a !important;
+}
+
+body:not(.dark-mode) a:hover,
+body:not(.dark-mode) .table-hover tbody tr:hover td,
+body:not(.dark-mode) .table-hover tbody tr:hover th {
+    color: #000000 !important;
+    background-color: #e9ecef !important;
+}
+
