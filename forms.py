@@ -42,8 +42,8 @@ class PostForm(FlaskForm):
 
 class ProjectForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    image = StringField('Image URL', validators=[DataRequired()])
+    body = TextAreaField('Description', validators=[DataRequired()])
+    img_url = StringField('Image URL', validators=[DataRequired()])
     github_url = StringField('GitHub URL', validators=[Optional(), URL()])
     live_url = StringField('Live URL', validators=[Optional(), URL()])
 

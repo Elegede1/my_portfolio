@@ -72,7 +72,7 @@ class SecureFileAdmin(FileAdmin):
         return redirect(url_for('login', next=request.url))
 
 class ProjectView(SecureModelView):
-    column_list = ('title', 'description', 'image', 'github_url', 'live_url')
+    column_list = ('title', 'body', 'img_url', 'github_url', 'live_url')
     form = ProjectForm
     # Flask-Admin PyMongo requires explicit form mapping if not using MongoEngine
     # However, since we want security and simplicity, we use the basic ModelView
@@ -110,13 +110,13 @@ admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/128
 admin.add_view(ProjectView(mongo.db.projects, 'Projects'))
 admin.add_view(UserView(mongo.db.users, 'Users'))
 admin.add_view(MessageView(mongo.db.messages, 'Contact Messages'))
-admin.add_view(ExperienceView(mongo.db.experience, 'Resume - Experience'))
-admin.add_view(EducationView(mongo.db.education, 'Resume - Education'))
-admin.add_view(SkillView(mongo.db.skills, 'Resume - Skills'))
+admin.add_view(ExperienceView(mongo.db.experience, 'Experience', category='Résumé'))
+admin.add_view(EducationView(mongo.db.education, 'Education', category='Résumé'))
+admin.add_view(SkillView(mongo.db.skills, 'Skills', category='Résumé'))
 
 # Allow editing the resume PDF
 path = os.path.join(app.root_path, 'static', 'files')
-admin.add_view(SecureFileAdmin(path, '/static/files/', name='Resume File'))
+admin.add_view(SecureFileAdmin(path, '/static/files/', name='Resume File', category='Résumé'))
 
 # --- User Model Wrapper for Flask-Login ---
 class User(UserMixin):

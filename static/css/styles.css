@@ -12002,3 +12002,45 @@ html {
 .github-btn:hover .fab {
     transform: scale(1.5);
 }
+/* Admin Panel Specific Dark Mode Overrides */
+.dark-mode .table,
+.dark-mode .table th,
+.dark-mode .table td,
+.dark-mode .panel,
+.dark-mode .panel-default > .panel-heading,
+.dark-mode .nav-tabs > li > a,
+.dark-mode label,
+.dark-mode .help-block {
+    color: #e0e0e0;
+}
+
+.dark-mode .panel,
+.dark-mode .panel-default > .panel-heading,
+.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #1e1e1e;
+}
+
+.dark-mode .table-bordered th,
+.dark-mode .table-bordered td {
+    border-color: #333;
+}
+.dark-mode input.form-control,
+.dark-mode select.form-control,
+.dark-mode textarea.form-control {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-color: #444;
+}
+.dark-mode input.form-control:focus,
+.dark-mode select.form-control:focus,
+.dark-mode textarea.form-control:focus {
+    background-color: #333;
+    color: #fff;
+    border-color: #555;
+}
+.dark-mode .list-group-item {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-color: #444;
+}
+

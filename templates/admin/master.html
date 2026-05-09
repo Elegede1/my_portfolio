@@ -13,15 +13,13 @@
     </style>
 {% endblock %}
 
-{% block access_control %}
-    <ul class="nav navbar-nav navbar-right">
-        <li>
-            <a id="adminDarkModeToggle" title="Toggle Dark Mode">
-                <i class="fa fa-moon-o"></i>
-            </a>
-        </li>
-        {{ super() }}
-    </ul>
+{% block menu_links %}
+    <li class="nav-item">
+        <a class="nav-link" id="adminDarkModeToggle" title="Toggle Dark Mode" style="cursor: pointer;">
+            <i class="fa fa-moon-o"></i>
+        </a>
+    </li>
+    {{ super() }}
 {% endblock %}
 
 {% block tail %}
