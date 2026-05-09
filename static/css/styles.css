@@ -12078,3 +12078,25 @@ body:not(.dark-mode) .table-hover tbody tr:hover th {
     background-color: #e9ecef !important;
 }
 
+
+/* Admin Active Menu Highlight */
+.navbar-nav .nav-item.active > .nav-link,
+.navbar-nav .nav-item > .nav-link.active,
+.navbar-nav .dropdown.active > .nav-link {
+    font-weight: 900 !important;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 1px currentColor;
+}
+
+body.dark-mode .navbar-nav .nav-item.active > .nav-link,
+body.dark-mode .navbar-nav .dropdown.active > .nav-link {
+    color: #ffffff !important;
+    border-bottom: 2px solid #ffffff;
+}
+
+body:not(.dark-mode) .navbar-nav .nav-item.active > .nav-link,
+body:not(.dark-mode) .navbar-nav .dropdown.active > .nav-link {
+    color: #000000 !important;
+    border-bottom: 2px solid #000000;
+}
+
