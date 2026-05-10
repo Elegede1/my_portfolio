@@ -3,7 +3,7 @@ import datetime
 from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
+from forms import LoginForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
@@ -141,24 +141,6 @@ def load_user(user_id):
     return None
 
 # --- Routes ---
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        existing_user = mongo.db.users.find_one({"email": form.email.data})
-        if existing_user:
-            flash('An account with that email already exists.')
-            return redirect(url_for('login'))
-
-        mongo.db.users.insert_one({
-            "email": form.email.data,
-            "password": generate_password_hash(form.password.data, method='pbkdf2:sha256', salt_length=8),
-            "name": form.name.data,
-            "role": "user"
-        })
-        flash('Account created successfully!')
-        return redirect(url_for('login'))
-    return render_template('register.html', form=form)
 
 @app.route('/12812673-738234login', methods=['GET', 'POST'])
 def login():
