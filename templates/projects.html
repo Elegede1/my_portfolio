@@ -24,7 +24,17 @@
                                                         <a href="https://github.com/Elegede1/pong_game" class="btn btn-outline-primary mt-3"><i class="fab fa-github"></i> github</a>
                                                         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
                                                     </div>
-                                                    <img src="{{ url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image">
+                                                    <div class="project-media">
+                                                        <img src="{{ project.img_url if project.img_url.startswith('http') else url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image-main">
+                                                        <div class="project-images-secondary">
+                                                            {% if project.img_url_2 %}
+                                                            <img src="{{ project.img_url_2 if project.img_url_2.startswith('http') else url_for('static', filename=project.img_url_2) }}" alt="{{ project.title }} 2" class="project-image-small">
+                                                            {% endif %}
+                                                            {% if project.img_url_3 %}
+                                                            <img src="{{ project.img_url_3 if project.img_url_3.startswith('http') else url_for('static', filename=project.img_url_3) }}" alt="{{ project.title }} 3" class="project-image-small">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

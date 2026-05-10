@@ -72,7 +72,7 @@ class SecureFileAdmin(FileAdmin):
         return redirect(url_for('login', next=request.url))
 
 class ProjectView(SecureModelView):
-    column_list = ('title', 'body', 'img_url', 'github_url', 'live_url')
+    column_list = ('title', 'body', 'img_url', 'img_url_2', 'img_url_3', 'github_url', 'live_url')
     form = ProjectForm
     # Flask-Admin PyMongo requires explicit form mapping if not using MongoEngine
     # However, since we want security and simplicity, we use the basic ModelView
