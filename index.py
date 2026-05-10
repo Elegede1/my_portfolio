@@ -80,6 +80,27 @@ class ProjectView(SecureModelView):
     def on_model_change(self, form, model, is_created):
         if is_created:
             model['date'] = datetime.datetime.utcnow()
+            
+        # Handle file uploads
+        upload_mapping = {
+            'main_image': 'img_url',
+            'image_2': 'img_url_2',
+            'image_3': 'img_url_3'
+        }
+        
+        for file_field, url_field in upload_mapping.items():
+            file_data = getattr(form, file_field).data
+            if file_data:
+                filename = secure_filename(file_data.filename)
+                # Add timestamp to avoid duplicates
+                filename = f"{int(datetime.datetime.now().timestamp())}_{filename}"
+                upload_dir = os.path.join(app.root_path, 'static', 'uploads')
+                if not os.path.exists(upload_dir):
+                    os.makedirs(upload_dir, exist_ok=True)
+                file_path = os.path.join(upload_dir, filename)
+                file_data.save(file_path)
+                model[url_field] = f"uploads/{filename}"
+                
         return super().on_model_change(form, model, is_created)
 
 class UserView(SecureModelView):

@@ -31,9 +31,15 @@ class PostForm(FlaskForm):
 class ProjectForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     body = TextAreaField('Description', validators=[DataRequired()])
-    img_url = StringField('Main Image URL', validators=[DataRequired()])
-    img_url_2 = StringField('Secondary Image URL 1', validators=[Optional()])
-    img_url_3 = StringField('Secondary Image URL 2', validators=[Optional()])
+    img_url = StringField('Main Image URL (or path)', description="Pasting a link here works, but uploading below will overwrite it.")
+    main_image = FileField('Upload Main Image', description="Select a file from your device/phone")
+    
+    img_url_2 = StringField('Secondary Image URL 1', description="Pasting a link here works, but uploading below will overwrite it.")
+    image_2 = FileField('Upload Secondary Image 1', description="Select a file from your device/phone")
+    
+    img_url_3 = StringField('Secondary Image URL 2', description="Pasting a link here works, but uploading below will overwrite it.")
+    image_3 = FileField('Upload Secondary Image 2', description="Select a file from your device/phone")
+    
     github_url = StringField('GitHub URL', validators=[Optional(), URL()])
     live_url = StringField('Live URL', validators=[Optional(), URL()])
 
