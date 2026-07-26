@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, URL, Optional
 
@@ -8,19 +9,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
-
-
-
-
-
-class PostForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    body = TextAreaField('Content', validators=[DataRequired()])
-
-    img_url = StringField('Image URL', validators=[Optional()])
-
-    github_url = StringField('GitHub URL', validators=[URL(), Optional()])  # Added Optional() here, see below
-    submit = SubmitField('Save Changes')
 
 
 class ProjectForm(FlaskForm):
@@ -74,4 +62,4 @@ class EducationForm(FlaskForm):
 class SkillForm(FlaskForm):
     name = StringField('Skill Name', validators=[DataRequired()])
     skill_type = SelectField('Type', choices=[('Professional', 'Professional'), ('Language', 'Language')], validators=[DataRequired()])
-
+

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
-{%block content%}
-    <!-- Projects Section-->
+{% block content %}
+    <!-- Projects Section -->
     <section class="py-5">
         <div class="container px-5 mb-5">
             <div class="text-center mb-5">
@@ -9,7 +9,7 @@
             </div>
             <div class="row gx-5 justify-content-center">
                 <div class="col-lg-11 col-xl-9 col-xxl-8">
-                    <!-- Project Card 1-->
+                    <!-- Project Card -->
                     {% if projects %}
                         {% for project in projects %}
                             <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
@@ -21,11 +21,21 @@
                                                     <div class="project-text">
                                                         <h2>{{ project.title or '' }}</h2>
                                                             {{ project.body|default('') | safe }}
-                                                        <a href="https://github.com/Elegede1/pong_game" class="btn btn-outline-primary mt-3"><i class="fab fa-github"></i> github</a>
-                                                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                                                        {% if project.github_url %}
+                                                        <a href="{{ project.github_url }}" class="btn btn-outline-primary mt-3" target="_blank" rel="noopener">
+                                                            <i class="bi bi-github"></i> GitHub
+                                                        </a>
+                                                        {% endif %}
+                                                        {% if project.live_url %}
+                                                        <a href="{{ project.live_url }}" class="btn btn-outline-secondary mt-3 ms-2" target="_blank" rel="noopener">
+                                                            <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                                                        </a>
+                                                        {% endif %}
                                                     </div>
                                                     <div class="project-media">
+                                                        {% if project.img_url %}
                                                         <img src="{{ project.img_url if project.img_url.startswith('http') else url_for('static', filename=project.img_url) }}" alt="{{ project.title }}" class="project-image-main">
+                                                        {% endif %}
                                                         <div class="project-images-secondary">
                                                             {% if project.img_url_2 %}
                                                             <img src="{{ project.img_url_2 if project.img_url_2.startswith('http') else url_for('static', filename=project.img_url_2) }}" alt="{{ project.title }} 2" class="project-image-small">
@@ -45,7 +55,7 @@
                     {% else %}
                         <div class="card overflow-hidden shadow rounded-4 border-0 mb-5">
                             <div class="card-body p-5">
-                                <p>No projects available yet.</p> <!--- Or something more descriptive -->
+                                <p class="text-center text-muted">No projects available yet.</p>
                             </div>
                         </div>
                     {% endif %}
@@ -53,8 +63,8 @@
             </div>
         </div>
     </section>
-    <!-- Call to action section-->
-    <section class="py-5 bg-gradient-primary-to-secondary text-white">
+    <!-- Call to action section -->
+    <section class="py-5" style="background: var(--gradient-primary); color: var(--white);">
         <div class="container px-5 my-5">
             <div class="text-center">
                 <h2 class="display-4 fw-bolder mb-4">Let's build something together</h2>

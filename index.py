@@ -3,7 +3,7 @@ import datetime
 from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, PostForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
+from forms import LoginForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv

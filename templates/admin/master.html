@@ -2,18 +2,8 @@
 
 {% block head_tail %}
     {{ super() }}
-    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-    <style>
-        /* Admin specific dark mode toggle button styling */
-        #adminDarkModeToggle {
-            margin-top: 10px;
-            margin-right: 15px;
-            cursor: pointer;
-        }
-    </style>
+    <link href="{{ url_for('static', filename='css/styles.min.css') }}" rel="stylesheet">
 {% endblock %}
-
-
 
 {% block tail %}
     {{ super() }}
@@ -21,17 +11,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             const body = document.body;
             
-            // 1. Create the toggle button element
+            // Check for existing dark mode toggle in navbar
+            const existingToggle = document.getElementById('adminDarkModeToggle');
+            if (existingToggle) {
+                return; // Already exists
+            }
+
+            // Create the toggle button element
             const toggleLi = document.createElement('li');
             toggleLi.className = 'nav-item';
             toggleLi.innerHTML = `
                 <a class="nav-link" id="adminDarkModeToggle" title="Toggle Dark Mode" style="cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <i class="fa fa-moon-o"></i>
+                    <i class="bi bi-moon-stars"></i>
                 </a>
             `;
             
-            // 2. Find the navbar and inject it
-            // Flask-Admin Bootstrap 4 uses .navbar-nav. We'll append it to the last one (usually right-aligned items)
+            // Find the navbar and inject it
             const navbars = document.querySelectorAll('.navbar-nav');
             if (navbars.length > 0) {
                 // Append to the last .navbar-nav found (often the right side one)
@@ -43,7 +38,7 @@
             // Check saved preference
             if (localStorage.getItem('darkMode') === 'enabled') {
                 body.classList.add('dark-mode');
-                if (toggle) toggle.innerHTML = '<i class="fa fa-sun-o"></i>';
+                if (toggle) toggle.innerHTML = '<i class="bi bi-sun"></i>';
             }
 
             if (toggle) {
@@ -52,10 +47,10 @@
                     
                     if (body.classList.contains('dark-mode')) {
                         localStorage.setItem('darkMode', 'enabled');
-                        toggle.innerHTML = '<i class="fa fa-sun-o"></i>';
+                        toggle.innerHTML = '<i class="bi bi-sun"></i>';
                     } else {
                         localStorage.setItem('darkMode', 'disabled');
-                        toggle.innerHTML = '<i class="fa fa-moon-o"></i>';
+                        toggle.innerHTML = '<i class="bi bi-moon-stars"></i>';
                     }
                 });
             }
