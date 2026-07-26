@@ -34,13 +34,65 @@ if mongo_uri:
     if mongo_uri.endswith('/'):
         mongo_uri = mongo_uri[:-1]
 
+# IMPORTANT: We deliberately do NOT raise if MONGO_URI is missing or unreachable.
+# Raising at module-import time kills the entire serverless function before any
+# request can be served — meaning the homepage (which uses NO Mongo data) would
+# 500 silently whenever Atlas is paused, misconfigured, or DNS-failing.
+# Instead, we configure it if present and lazy-init the connection on first use.
+# Per-route handlers protect themselves with get_db_or_503() so only the
+# Mongo-dependent routes degrade, not the whole app.
 if not mongo_uri:
-    # On Vercel, we want to know exactly why it's failing
-    print("CRITICAL: MONGO_URI is not set in environment variables.")
-    raise ValueError("MONGO_URI environment variable is missing. Please add it to your Vercel Project Settings.")
+    print("WARNING: MONGO_URI is not set. The site will render but Mongo-backed routes (/projects, /resume, /contact, /admin) will return 503.")
+    app.config['MONGO_URI'] = None
+else:
+    app.config['MONGO_URI'] = mongo_uri
 
-app.config['MONGO_URI'] = mongo_uri
-mongo = PyMongo(app)
+# Lazy PyMongo — do NOT instantiate at import time. Avoids invoking DNS SRV
+# resolution until the first request that actually needs Mongo.
+_mongo = None
+
+def get_db_or_503():
+    """Return the mongo db handle, or None if Mongo is unavailable.
+    Routes that depend on data should call this and either render a graceful
+    fallback or return a 503 if it returns None."""
+    global _mongo
+    if _mongo is not None:
+        try:
+            # touch the connection to make sure it's actually alive
+            _mongo.db.command('ping')
+            return _mongo.db
+        except Exception:
+            # connection died (e.g. Atlas paused mid-flight); fall through and try to re-init
+            _mongo = None
+    if not app.config.get('MONGO_URI'):
+        return None
+    try:
+        _mongo = PyMongo(app)
+        _mongo.db.command('ping')
+        return _mongo.db
+    except Exception as e:
+        # Could be DNS failure (Atlas paused), bad URI, network blip, etc.
+        # Don't crash; just route-level degrade.
+        print(f"Mongo unavailable: {e}")
+        _mongo = None
+        return None
+
+# For legacy code that imports `mongo` directly (admin views, Flask-Login user_loader),
+# expose a backward-compatible proxy that lazily initializes on attribute access.
+class _MongoProxy:
+    """Backward-compatible proxy so existing `mongo.db...` references keep working.
+    Each attribute access goes through get_db_or_503, so we never hold a dead connection."""
+    @property
+    def db(self):
+        return get_db_or_503()
+
+    def __getattr__(self, name):
+        # fall back to the underlying PyMongo instance for non-db attrs
+        if _mongo is not None:
+            return getattr(_mongo, name)
+        raise RuntimeError("Mongo is not available")
+
+mongo = _MongoProxy()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -106,13 +158,39 @@ class SkillView(SecureModelView):
 
 
 # Initialize Flask-Admin with secret URL and custom base template for Dark Mode
+# Note: Admin views are registered lazily on first request to the admin area.
+# This avoids requiring a live MongoDB connection at module import time, which
+# would crash the serverless function if Atlas is paused/misconfigured.
 admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/12812673-738234admin', base_template='admin/master.html')
-admin.add_view(ProjectView(mongo.db.projects, 'Projects'))
-admin.add_view(UserView(mongo.db.users, 'Users'))
-admin.add_view(MessageView(mongo.db.messages, 'Contact Messages'))
-admin.add_view(ExperienceView(mongo.db.experience, 'Experience', category='Résumé'))
-admin.add_view(EducationView(mongo.db.education, 'Education', category='Résumé'))
-admin.add_view(SkillView(mongo.db.skills, 'Skills', category='Résumé'))
+_admin_views_registered = False
+
+def _register_admin_views():
+    """Register Flask-Admin views against the (possibly lazy) Mongo collections.
+    Called on first request to /admin/* via a before_request hook. No-ops after
+    the first successful registration."""
+    global _admin_views_registered
+    if _admin_views_registered:
+        return
+    db = get_db_or_503()
+    if db is None:
+        return  # Mongo not available; admin views stay unregistered this cycle
+    try:
+        admin.add_view(ProjectView(db.projects, 'Projects'))
+        admin.add_view(UserView(db.users, 'Users'))
+        admin.add_view(MessageView(db.messages, 'Contact Messages'))
+        admin.add_view(ExperienceView(db.experience, 'Experience', category='Résumé'))
+        admin.add_view(EducationView(db.education, 'Education', category='Résumé'))
+        admin.add_view(SkillView(db.skills, 'Skills', category='Résumé'))
+        _admin_views_registered = True
+    except Exception as e:
+        print(f"Admin views registration deferred (Mongo not ready): {e}")
+
+@app.before_request
+def _maybe_register_admin_views():
+    # Only attempt registration on admin URLs to avoid hitting Mongo on every
+    # public request. Triggers a lazy Mongo init only when admin is accessed.
+    if request.path.startswith('/12812673-738234admin'):
+        _register_admin_views()
 
 # Allow editing the resume PDF
 path = os.path.join(app.root_path, 'static', 'files')
@@ -146,7 +224,11 @@ def load_user(user_id):
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user_data = mongo.db.users.find_one({"email": form.email.data})
+        db = get_db_or_503()
+        if db is None:
+            flash('Login is temporarily unavailable. Please try again later.', 'danger')
+            return render_template('login.html', form=form), 503
+        user_data = db.users.find_one({"email": form.email.data})
 
         if user_data and check_password_hash(user_data["password"], form.password.data):
             user = User(user_data)
@@ -178,7 +260,11 @@ def index():
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
-        mongo.db.messages.insert_one({
+        db = get_db_or_503()
+        if db is None:
+            flash('Sorry, the contact form is temporarily unavailable. Please reach me via email or social media.', 'danger')
+            return render_template('contact.html', form=form), 503
+        db.messages.insert_one({
             "name": form.name.data,
             "email": form.email.data,
             "subject": form.subject.data,
@@ -191,23 +277,32 @@ def contact():
 
 @app.route('/projects', methods=['GET'])
 def projects():
-    all_projects = mongo.db.projects.find().sort("date", -1)
+    db = get_db_or_503()
+    if db is None:
+        # Render with empty list rather than 500 — projects.html handles empty projects gracefully.
+        all_projects = []
+    else:
+        all_projects = list(db.projects.find().sort("date", -1))
     current_year = datetime.datetime.now().year
     return render_template('projects.html', projects=all_projects, year=current_year, user=current_user)
 
 @app.route('/resume')
 def resume():
-    experience = list(mongo.db.experience.find())
-    education = list(mongo.db.education.find())
+    db = get_db_or_503()
+    if db is None:
+        # Render with empty sections rather than 500 — resume.html should handle empty lists gracefully.
+        return render_template('resume.html', experience=[], education=[], prof_skills=[], lang_skills=[])
+    experience = list(db.experience.find())
+    education = list(db.education.find())
     # Separate skills by type
-    prof_skills = list(mongo.db.skills.find({"skill_type": "Professional"}))
-    lang_skills = list(mongo.db.skills.find({"skill_type": "Language"}))
+    prof_skills = list(db.skills.find({"skill_type": "Professional"}))
+    lang_skills = list(db.skills.find({"skill_type": "Language"}))
     
     return render_template('resume.html', 
-                           experience=experience, 
-                           education=education, 
-                           prof_skills=prof_skills, 
-                           lang_skills=lang_skills)
+                          experience=experience, 
+                          education=education, 
+                          prof_skills=prof_skills, 
+                          lang_skills=lang_skills)
 
 
 @app.route('/download')
