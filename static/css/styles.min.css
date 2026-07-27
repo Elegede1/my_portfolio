@@ -309,7 +309,11 @@ footer a:hover { color: var(--primary); }
 .admin-nav-toggle i { font-size: 1.25rem; color: var(--text-secondary); transition: color 0.15s ease-in-out; }
 .admin-nav-toggle:hover i { color: var(--primary); }
 
-/* Text gradient utility */
+/* Text muted utility - use custom variable */
+.text-muted { color: var(--text-muted) !important; }
+.text-primary { color: var(--primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-white { color: var(--white) !important; }
 .text-gradient { 
   background: var(--gradient-primary); 
   -webkit-background-clip: text; 
@@ -320,10 +324,10 @@ footer a:hover { color: var(--primary); }
 /* Override Bootstrap's bg-light for our theme */
 .bg-light { background-color: var(--bg-secondary) !important; }
 .bg-white { background-color: var(--card-bg) !important; }
-
-/* Footer */
-footer { background: var(--footer-bg); border-top: 1px solid var(--border-color); padding: 1.5rem 0; }
-footer a { color: var(--text-secondary); }
+.bg-primary { background-color: var(--primary) !important; color: var(--white) !important; }
+.bg-secondary { background-color: var(--secondary) !important; color: var(--white) !important; }
+.bg-gradient-primary-to-secondary { background: var(--gradient-primary) !important; color: var(--white) !important; }
+.text-white { color: var(--white) !important; }
 footer a:hover { color: var(--primary); }
 
 /* Resume cards - override Bootstrap grid for skills */
