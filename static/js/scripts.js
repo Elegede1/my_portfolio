@@ -39,45 +39,4 @@ document.addEventListener('DOMContentLoaded', () => {
             updateToggleIcon();
         });
     }
-
-    // Navbar collapse handling - Bootstrap 5 compatible
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    const navbarCollapse = document.querySelector('.navbar-collapse');
-
-    if (navbarToggler && navbarCollapse) {
-        navbarToggler.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            navbarCollapse.classList.toggle('show');
-        });
-
-        // Close collapse when clicking a nav link (mobile)
-        navbarCollapse.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 992) {
-                    navbarCollapse.classList.remove('show');
-                }
-            });
-        });
-
-        // Close collapse when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!navbarToggler.contains(e.target) && !navbarCollapse.contains(e.target)) {
-                navbarCollapse.classList.remove('show');
-            }
-        });
-    }
-
-    // Also support Bootstrap's data-bs-toggle if Bootstrap JS is loaded
-    // This ensures both methods work
-    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = btn.getAttribute('data-bs-target');
-            const target = document.querySelector(targetId);
-            if (target) {
-                target.classList.toggle('show');
-            }
-        });
-    });
 });
