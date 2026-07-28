@@ -138,7 +138,6 @@ body {
 .navbar-expand-lg .navbar-nav { flex-direction: row; }
 .navbar-expand-lg .navbar-nav .nav-link { padding-right: 0.5rem; padding-left: 0.5rem; }
 .navbar-expand-lg .navbar-nav .nav-item { margin: 0; }
-.navbar-expand-lg .navbar-toggler { display: none; }
 .navbar-expand-lg .navbar-collapse { display: flex !important; flex-basis: auto; }
 
 /* Navbar collapse - critical for mobile */
