@@ -31,7 +31,19 @@
                                                 <div class="small text-muted">{{ exp.location }}</div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-8"><div>{{ exp.description }}</div></div>
+                                        <div class="col-lg-8">
+                                            {% if exp.description %}
+                                                {% if exp.description is iterable and not exp.description is string %}
+                                                    <ul class="mb-0">
+                                                        {% for item in exp.description %}
+                                                        <li>{{ item }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    <div>{{ exp.description | safe }}</div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
