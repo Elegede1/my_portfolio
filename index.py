@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, abort, Response
+import io
 import datetime
 from flask_bootstrap import Bootstrap4
 from flask_wtf import CSRFProtect
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm
+from forms import LoginForm, ContactForm, ProjectForm, UserForm, MessageForm, ExperienceForm, EducationForm, SkillForm, ResumeUploadForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from dotenv import load_dotenv
@@ -96,6 +97,8 @@ mongo = _MongoProxy()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+# Redirect unauthenticated users to the secret login page instead of a bare 401.
+login_manager.login_view = 'login'
 csrf = CSRFProtect(app)
 Bootstrap4(app)
 
@@ -305,9 +308,93 @@ def resume():
                           lang_skills=lang_skills)
 
 
+# --- Resume PDF management ---
+# On Vercel the filesystem is read-only, so we CANNOT overwrite the bundled
+# static PDF at runtime. Instead we store an uploaded resume in MongoDB (which
+# is writable) and serve it from there, falling back to the bundled static file
+# when no upload exists yet.
+RESUME_STATIC_PATH = "files/Jekuthiel_Okafor's_resume.pdf"
+
+
+@app.route('/12812673-738234admin/resume', methods=['GET', 'POST'])
+@login_required
+def upload_resume():
+    """Secured page to replace the resume PDF. Stores the file in MongoDB so it
+    persists on Vercel's read-only serverless filesystem."""
+    if not (current_user.is_authenticated and getattr(current_user, 'role', None) == 'admin'):
+        return redirect(url_for('login', next=request.url))
+
+    form = ResumeUploadForm()
+    db = get_db_or_503()
+
+    # Info about the currently stored resume (if any) for display.
+    current = None
+    if db is not None:
+        try:
+            current = db.settings.find_one({"_id": "resume"})
+        except Exception:
+            current = None
+
+    if form.validate_on_submit():
+        if db is None:
+            flash('Resume upload is temporarily unavailable (database offline). Please try again later.', 'danger')
+            return render_template('admin/upload_resume.html', form=form, current=current), 503
+        file = form.resume.data
+        data = file.read()
+        if not data:
+            flash('The uploaded file was empty. Please choose a valid PDF.', 'danger')
+            return redirect(url_for('upload_resume'))
+        # Basic sanity check: PDFs start with "%PDF".
+        if not data[:4] == b'%PDF':
+            flash('That does not look like a valid PDF file.', 'danger')
+            return redirect(url_for('upload_resume'))
+        try:
+            db.settings.update_one(
+                {"_id": "resume"},
+                {"$set": {
+                    "data": data,
+                    "filename": secure_filename(file.filename) or "resume.pdf",
+                    "content_type": "application/pdf",
+                    "size": len(data),
+                    "updated_at": datetime.datetime.utcnow(),
+                }},
+                upsert=True,
+            )
+            flash('Resume replaced successfully! Visitors will now download the new PDF.', 'success')
+            return redirect(url_for('upload_resume'))
+        except Exception as e:
+            print(f"Resume upload failed: {e}")
+            flash('Sorry, saving the resume failed. Please try again.', 'danger')
+            return redirect(url_for('upload_resume'))
+
+    return render_template('admin/upload_resume.html', form=form, current=current)
+
+
 @app.route('/download')
 def download():
-    return send_from_directory('static', path="files/Jekuthiel_Okafor's_resume.pdf")
+    """Serve the resume. Prefer the DB-stored upload; fall back to the bundled
+    static PDF so the button always works even before the first upload."""
+    db = get_db_or_503()
+    if db is not None:
+        try:
+            doc = db.settings.find_one({"_id": "resume"})
+            if doc and doc.get("data"):
+                pdf_bytes = doc["data"]
+                # PyMongo returns Binary; bytes() normalizes it for the Response.
+                filename = doc.get("filename") or "Jekuthiel_Okafor_resume.pdf"
+                return Response(
+                    bytes(pdf_bytes),
+                    mimetype="application/pdf",
+                    headers={
+                        "Content-Disposition": f'attachment; filename="{filename}"',
+                        "Content-Length": str(len(pdf_bytes)),
+                    },
+                )
+        except Exception as e:
+            print(f"Serving resume from DB failed, falling back to static: {e}")
+    # Fallback: bundled static file.
+    return send_from_directory('static', path=RESUME_STATIC_PATH)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

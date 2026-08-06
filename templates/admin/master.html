@@ -12,6 +12,19 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const body = document.body;
+
+            // --- Inject a "Replace Resume" link into the admin navbar ---
+            // Flask-Admin builds its menu from registered views; the resume upload
+            // is a custom route, so we add its link on the client side.
+            try {
+                const menus = document.querySelectorAll('.navbar-nav');
+                if (menus.length > 0 && !document.getElementById('resumeUploadLink')) {
+                    const li = document.createElement('li');
+                    li.className = 'nav-item';
+                    li.innerHTML = '<a class="nav-link" id="resumeUploadLink" href="/12812673-738234admin/resume"><i class="bi bi-file-earmark-pdf"></i> Replace Resume</a>';
+                    menus[0].appendChild(li);
+                }
+            } catch (e) {}
             
             // Check for existing dark mode toggle in navbar
             const existingToggle = document.getElementById('adminDarkModeToggle');

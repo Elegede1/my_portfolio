@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo, URL, Optional
 
@@ -63,3 +63,13 @@ class SkillForm(FlaskForm):
     name = StringField('Skill Name', validators=[DataRequired()])
     skill_type = SelectField('Type', choices=[('Professional', 'Professional'), ('Language', 'Language')], validators=[DataRequired()])
 
+
+class ResumeUploadForm(FlaskForm):
+    resume = FileField(
+        'Resume PDF',
+        validators=[
+            FileRequired(message='Please choose a PDF file to upload.'),
+            FileAllowed(['pdf'], message='Only PDF files are allowed.'),
+        ],
+    )
+    submit = SubmitField('Upload & Replace Resume')

@@ -1,0 +1,58 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<div class="container" style="max-width: 720px; margin-top: 2rem;">
+    <h2 class="mb-3"><i class="bi bi-file-earmark-pdf"></i> Replace Resume PDF</h2>
+    <p class="text-muted">
+        Upload a new PDF to replace the resume that visitors download from the
+        <strong>Resume</strong> page and the <strong>Download Resume</strong> button.
+        The file is stored in the database, so it persists across deployments.
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'danger' else ('success' if category == 'success' else 'info') }}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if current %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-2">Current resume on file</h5>
+          <p class="card-text mb-1"><strong>File:</strong> {{ current.filename }}</p>
+          <p class="card-text mb-1"><strong>Size:</strong> {{ (current.size / 1024) | round(1) }} KB</p>
+          {% if current.updated_at %}
+          <p class="card-text mb-2"><strong>Last updated:</strong> {{ current.updated_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
+          {% endif %}
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('download') }}" target="_blank">
+            <i class="bi bi-download"></i> Download current
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        No custom resume uploaded yet. The site is currently serving the bundled default PDF.
+      </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.resume.label(class="form-label") }}
+            {{ form.resume(class="form-control", accept=".pdf") }}
+            {% if form.resume.errors %}
+              <div class="text-danger mt-1">
+                {% for error in form.resume.errors %}{{ error }}<br>{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">PDF only. Max recommended size ~10 MB.</div>
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="/12812673-738234admin" class="btn btn-link">Back to admin</a>
+    </form>
+</div>
+{% endblock %}
