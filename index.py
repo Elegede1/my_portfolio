@@ -102,6 +102,12 @@ login_manager.login_view = 'login'
 csrf = CSRFProtect(app)
 Bootstrap4(app)
 
+# Vercel serverless functions reject any request body over ~4.5MB with an
+# opaque 413 before it even reaches Flask. Cap uploads at 4MB so we can show
+# a friendly error instead, and so a giant file never wastes bandwidth.
+MAX_UPLOAD_BYTES = 4 * 1024 * 1024  # 4 MB
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_BYTES
+
 # --- Define upload folder ---
 try:
     UPLOAD_FOLDER = os.path.join(app.root_path, 'static/uploads')
@@ -306,6 +312,20 @@ def resume():
                           education=education, 
                           prof_skills=prof_skills, 
                           lang_skills=lang_skills)
+
+
+@app.errorhandler(413)
+def too_large(e):
+    """Friendly message when an upload exceeds MAX_CONTENT_LENGTH (or Vercel's
+    hard body limit). Without this the user would see a bare 413."""
+    flash('That file is too large. Please upload a PDF smaller than 4 MB.', 'danger')
+    # Send them back to the resume page if that's where they were.
+    if request.path.endswith('/resume') or 'resume' in request.path:
+        try:
+            return redirect(url_for('upload_resume'))
+        except Exception:
+            pass
+    return render_template('login.html', form=LoginForm()), 413
 
 
 # --- Resume PDF management ---

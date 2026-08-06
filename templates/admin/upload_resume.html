@@ -51,17 +51,34 @@
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 {{ form.resume.label(class="form-label fw-bold") }}
-                {{ form.resume(class="form-control", accept=".pdf") }}
+                {{ form.resume(class="form-control", accept=".pdf", onchange="checkSize(this)") }}
                 {% if form.resume.errors %}
                   <div class="text-danger mt-1">
                     {% for error in form.resume.errors %}{{ error }}<br>{% endfor %}
                   </div>
                 {% endif %}
-                <div class="form-text">PDF only. Max recommended size ~10 MB.</div>
+                <div class="form-text">PDF only. Maximum size 4 MB (Vercel upload limit).</div>
+                <div id="sizeWarning" class="text-danger mt-1" style="display:none;">
+                    This file is larger than 4 MB and will be rejected. Please compress it first.
+                </div>
             </div>
             {{ form.submit(class="btn btn-primary px-4") }}
         </form>
       </div>
     </div>
 </div>
+
+<script>
+  // Immediate feedback if the chosen PDF exceeds Vercel's 4MB body limit,
+  // so the user isn't surprised by a rejected upload after waiting.
+  function checkSize(input) {
+    var warn = document.getElementById('sizeWarning');
+    var max = 4 * 1024 * 1024;
+    if (input.files && input.files[0] && input.files[0].size > max) {
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  }
+</script>
 {% endblock %}
