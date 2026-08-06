@@ -201,9 +201,11 @@ def _maybe_register_admin_views():
     if request.path.startswith('/12812673-738234admin'):
         _register_admin_views()
 
-# Allow editing the resume PDF
-path = os.path.join(app.root_path, 'static', 'files')
-admin.add_view(SecureFileAdmin(path, '/static/files/', name='Resume File', category='Résumé'))
+# NOTE: The old SecureFileAdmin 'Resume File' view was removed. It wrote to
+# static/files/, which is READ-ONLY on Vercel, so replacing the resume that
+# way silently failed (and could error listing a non-writable dir). Resume
+# replacement now goes through /12812673-738234admin/resume (upload_resume
+# below), which stores the PDF in MongoDB and works on Vercel.
 
 # --- User Model Wrapper for Flask-Login ---
 class User(UserMixin):
