@@ -166,40 +166,71 @@ class SkillView(SecureModelView):
     form = SkillForm
 
 
-# Initialize Flask-Admin with secret URL and custom base template for Dark Mode
-# Note: Admin views are registered lazily on first request to the admin area.
-# This avoids requiring a live MongoDB connection at module import time, which
-# would crash the serverless function if Atlas is paused/misconfigured.
+# Initialize Flask-Admin with secret URL and custom base template for Dark Mode.
 admin = Admin(app, name='Portfolio Admin', template_mode='bootstrap4', url='/12812673-738234admin', base_template='admin/master.html')
-_admin_views_registered = False
 
-def _register_admin_views():
-    """Register Flask-Admin views against the (possibly lazy) Mongo collections.
-    Called on first request to /admin/* via a before_request hook. No-ops after
-    the first successful registration."""
-    global _admin_views_registered
-    if _admin_views_registered:
-        return
-    db = get_db_or_503()
-    if db is None:
-        return  # Mongo not available; admin views stay unregistered this cycle
-    try:
-        admin.add_view(ProjectView(db.projects, 'Projects'))
-        admin.add_view(UserView(db.users, 'Users'))
-        admin.add_view(MessageView(db.messages, 'Contact Messages'))
-        admin.add_view(ExperienceView(db.experience, 'Experience', category='Résumé'))
-        admin.add_view(EducationView(db.education, 'Education', category='Résumé'))
-        admin.add_view(SkillView(db.skills, 'Skills', category='Résumé'))
-        _admin_views_registered = True
-    except Exception as e:
-        print(f"Admin views registration deferred (Mongo not ready): {e}")
 
-@app.before_request
-def _maybe_register_admin_views():
-    # Only attempt registration on admin URLs to avoid hitting Mongo on every
-    # public request. Triggers a lazy Mongo init only when admin is accessed.
-    if request.path.startswith('/12812673-738234admin'):
-        _register_admin_views()
+class _LazyCollection:
+    """Stand-in for a PyMongo collection that resolves the *real* collection on
+    each operation via get_db_or_503().
+
+    Why this exists: Flask 3.x forbids blueprint registration (which
+    admin.add_view() performs) after the app has handled its first request. The
+    previous code registered admin views lazily inside a before_request hook,
+    which threw 'register_blueprint can no longer be called' and left the admin
+    CRUD create/edit routes unregistered (404). Flask-Admin's PyMongo ModelView
+    only needs the collection's .name at construction time, so we register all
+    views at import time with these lazy proxies and never touch Mongo until an
+    admin request actually reads/writes data."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def _c(self):
+        db = get_db_or_503()
+        if db is None:
+            raise RuntimeError('MongoDB is not available')
+        return db[self.name]
+
+    def count_documents(self, *a, **k):
+        return self._c().count_documents(*a, **k)
+
+    def find(self, *a, **k):
+        return self._c().find(*a, **k)
+
+    def find_one(self, *a, **k):
+        return self._c().find_one(*a, **k)
+
+    def insert_one(self, *a, **k):
+        return self._c().insert_one(*a, **k)
+
+    def insert_many(self, *a, **k):
+        return self._c().insert_many(*a, **k)
+
+    def replace_one(self, *a, **k):
+        return self._c().replace_one(*a, **k)
+
+    def update_one(self, *a, **k):
+        return self._c().update_one(*a, **k)
+
+    def delete_one(self, *a, **k):
+        return self._c().delete_one(*a, **k)
+
+    def aggregate(self, *a, **k):
+        return self._c().aggregate(*a, **k)
+
+
+# Register all admin views at IMPORT time (before the first request), using lazy
+# collection proxies so no live MongoDB connection is required at import.
+try:
+    admin.add_view(ProjectView(_LazyCollection('projects'), 'Projects'))
+    admin.add_view(UserView(_LazyCollection('users'), 'Users'))
+    admin.add_view(MessageView(_LazyCollection('messages'), 'Contact Messages'))
+    admin.add_view(ExperienceView(_LazyCollection('experience'), 'Experience', category='Résumé'))
+    admin.add_view(EducationView(_LazyCollection('education'), 'Education', category='Résumé'))
+    admin.add_view(SkillView(_LazyCollection('skills'), 'Skills', category='Résumé'))
+except Exception as e:
+    print(f"Admin view registration error: {e}")
 
 # NOTE: The old SecureFileAdmin 'Resume File' view was removed. It wrote to
 # static/files/, which is READ-ONLY on Vercel, so replacing the resume that
