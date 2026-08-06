@@ -1,8 +1,14 @@
-{% extends 'admin/master.html' %}
+{% extends 'base.html' %}
 
-{% block body %}
-<div class="container" style="max-width: 720px; margin-top: 2rem;">
-    <h2 class="mb-3"><i class="bi bi-file-earmark-pdf"></i> Replace Resume PDF</h2>
+{% block title %}Replace Resume - Admin{% endblock %}
+
+{% block content %}
+<div class="container px-5 my-5" style="max-width: 760px;">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 fw-bolder mb-0"><i class="bi bi-file-earmark-pdf"></i> Replace Resume PDF</h1>
+        <a href="/12812673-738234admin" class="btn btn-outline-secondary btn-sm">Back to admin</a>
+    </div>
+
     <p class="text-muted">
         Upload a new PDF to replace the resume that visitors download from the
         <strong>Resume</strong> page and the <strong>Download Resume</strong> button.
@@ -20,13 +26,13 @@
     {% endwith %}
 
     {% if current %}
-      <div class="card mb-4">
-        <div class="card-body">
-          <h5 class="card-title mb-2">Current resume on file</h5>
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-3">Current resume on file</h5>
           <p class="card-text mb-1"><strong>File:</strong> {{ current.filename }}</p>
           <p class="card-text mb-1"><strong>Size:</strong> {{ (current.size / 1024) | round(1) }} KB</p>
           {% if current.updated_at %}
-          <p class="card-text mb-2"><strong>Last updated:</strong> {{ current.updated_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
+          <p class="card-text mb-3"><strong>Last updated:</strong> {{ current.updated_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
           {% endif %}
           <a class="btn btn-sm btn-outline-primary" href="{{ url_for('download') }}" target="_blank">
             <i class="bi bi-download"></i> Download current
@@ -39,20 +45,23 @@
       </div>
     {% endif %}
 
-    <form method="POST" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
-        <div class="mb-3">
-            {{ form.resume.label(class="form-label") }}
-            {{ form.resume(class="form-control", accept=".pdf") }}
-            {% if form.resume.errors %}
-              <div class="text-danger mt-1">
-                {% for error in form.resume.errors %}{{ error }}<br>{% endfor %}
-              </div>
-            {% endif %}
-            <div class="form-text">PDF only. Max recommended size ~10 MB.</div>
-        </div>
-        {{ form.submit(class="btn btn-primary") }}
-        <a href="/12812673-738234admin" class="btn btn-link">Back to admin</a>
-    </form>
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-body p-4">
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.resume.label(class="form-label fw-bold") }}
+                {{ form.resume(class="form-control", accept=".pdf") }}
+                {% if form.resume.errors %}
+                  <div class="text-danger mt-1">
+                    {% for error in form.resume.errors %}{{ error }}<br>{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">PDF only. Max recommended size ~10 MB.</div>
+            </div>
+            {{ form.submit(class="btn btn-primary px-4") }}
+        </form>
+      </div>
+    </div>
 </div>
 {% endblock %}
